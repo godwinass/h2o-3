@@ -36,8 +36,9 @@ def glrm_PUBDEV_3454():
   startcsv = time.time()
   glrm_h2o.train(x=features, training_frame=datahex)
   endcsv = time.time()
-  print("************** Time taken to train GLRM model is {0}".format(endorc-startorc))
   glrm_h2o.show()
+  print("************** Time taken to train GLRM model is {0} minutes".format((endcsv-startcsv)/60.0))
+  sys.stdout.flush()
 
 
 if __name__ == "__main__":
