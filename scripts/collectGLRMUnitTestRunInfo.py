@@ -61,6 +61,7 @@ def run_commands(command, number_to_run, temp_file):
     result_dict["run_time_secs"] = []
     result_dict["iteration_number"] = []
     result_dict["seed"] = []
+    result_dict["loss"] =[]
 
     full_command = command# + ' > ' + temp_file
     list_command = 'cat '+testResult + ' > ' + temp_file
@@ -95,6 +96,9 @@ def run_commands(command, number_to_run, temp_file):
                         else:
                             if "@@@@@@@" in temp_string[0]:
                                 result_dict["seed"].append(float(temp_string[-1]))
+                            else:
+                                if "&&&&&&" in temp_string[0]:
+                                    result_dict["loss"].append(temp_string[-1])
 
     print(result_dict)
     return result_dict
@@ -121,6 +125,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
         run_time = []
         num_iter = []
         seeds = []
+        loss = []
 
         if os.path.exists(json_file) and not(is_new_run):
             with open(json_file, 'r') as test_file:
@@ -128,6 +133,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
                 run_time = temp_dict["run_time_secs"]
                 num_iter = temp_dict["iteration_number"]
                 seeds = temp_dict["seed"]
+                loss = temp_dict["loss"]
 
 
         if "iteration_number" in dict_keys:
@@ -142,6 +148,12 @@ def write_result_summary(result_dict, directory_path, is_new_run):
                 seeds.extend(result_dict["seed"])
             else:
                 seeds = result_dict["seed"]
+
+        if "loss" in dict_keys:
+            if len(seeds) > 0:
+                loss.extend(result_dict["loss"])
+            else:
+                loss = result_dict["loss"]
 
         if "run_time_secs" in dict_keys:
             if len(run_time) > 0:
@@ -158,6 +170,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
                 result_dict["run_time_secs"] = run_time
                 result_dict["iteration_number"] = num_iter
                 result_dict["seed"] = seeds
+                result_dict["loss"] = loss
 
                 # save results in json file
                 with open(json_file, 'w') as test_file:

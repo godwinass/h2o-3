@@ -28,6 +28,9 @@ def glrm_PUBDEV_3454():
   curr_time = str(round(time.time()))     # store current timestamp, used as part of filenames.
   seeds = int(round(time.time()))
 
+#  seeds = 1475363366    # a good seed
+  seeds = 1475451042    # a bad seed
+
   datahex = \
       h2o.upload_file(pyunit_utils.locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTolstonogov.csv"),
                       col_names=feature_names)
@@ -47,8 +50,10 @@ def glrm_PUBDEV_3454():
   endcsv = time.time()
  # glrm_h2o.show()
   iterNum = glrm_h2o._model_json["output"]["iterations"]
+  objectv = glrm_h2o._model_json["output"]["objective"]
   print("###########  number of iteration is {0}".format(iterNum))
   print("@@@@@@@@@@@@ seed used is {0}".format(seeds))
+  print("&&&&&&&&&&&& objective function value is {0}".format(objectv))
   print("************** Time taken to train GLRM model is {0} seconds".format(endcsv-startcsv))
   sys.stdout.flush()
 
