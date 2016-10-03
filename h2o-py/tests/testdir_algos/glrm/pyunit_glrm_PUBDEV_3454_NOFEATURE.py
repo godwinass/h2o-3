@@ -24,20 +24,32 @@ def glrm_PUBDEV_3454():
   features = ["emps_cnt", "client_revenue", "esdb_state", "esdb_zip", "revenue_adp", "status", "revenue_region",
   "business_unit", "naics3"]
   print("Importing user data...")
+
+  curr_time = str(round(time.time()))     # store current timestamp, used as part of filenames.
+  seeds = int(round(time.time()))
+
   datahex = \
-    h2o.upload_file(pyunit_utils.locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTolstonogov.csv"),
-                    col_names=feature_names)
-  datahex.describe()
+      h2o.upload_file(pyunit_utils.locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTolstonogov.csv"),
+                      col_names=feature_names)
+
+  # datahex = \
+  #     h2o.upload_file(pyunit_utils.locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTol1000.csv"),
+  #                     col_names=feature_names)
+
+#  datahex.describe()
 
   glrm_h2o = H2OGeneralizedLowRankEstimator(k=9, loss="Quadratic", transform="STANDARDIZE", multi_loss="Categorical",
                                             model_id="clients_core_glrm", regularization_x="L2",
                                             regularization_y="L1", gamma_x=0.2, gamma_y=0.5, max_iterations=1000,
-                                            init="SVD")
+                                            init="SVD", seed=seeds)
   startcsv = time.time()
   glrm_h2o.train(x=features, training_frame=datahex)
   endcsv = time.time()
-  glrm_h2o.show()
-  print("************** Time taken to train GLRM model is {0} minutes".format((endcsv-startcsv)/60.0))
+ # glrm_h2o.show()
+  iterNum = glrm_h2o._model_json["output"]["iterations"]
+  print("###########  number of iteration is {0}".format(iterNum))
+  print("@@@@@@@@@@@@ seed used is {0}".format(seeds))
+  print("************** Time taken to train GLRM model is {0} seconds".format(endcsv-startcsv))
   sys.stdout.flush()
 
 

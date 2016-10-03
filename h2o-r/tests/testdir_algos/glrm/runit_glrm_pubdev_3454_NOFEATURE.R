@@ -13,11 +13,16 @@ source("../../../scripts/h2o-r-test-setup.R")
 
 test.glrm.pubdev_3454 <- function() {
   Log.info("Input data files...")
-  data.hex <- h2o.uploadFile(locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTolstonogov.csv"), destination_frame="data.hex", na.strings=rep("NA", 10))
+  data.hex <- h2o.uploadFile(locate("smalldata/glrm_test/glrm_data_DTolstonogov.csv"), destination_frame="data.hex", na.strings=rep("NA", 10))
 
   features = c("emps_cnt", "client_revenue", "esdb_state", "esdb_zip", "revenue_adp", "status", "revenue_region", "business_unit", "naics3")
 
+  ptm <- proc.time()
   clients_glrm <- h2o.glrm(training_frame=data.hex, cols=features, k=9, model_id="clients_core_glrm", loading_name="arch_x", loss="Quadratic", transform="STANDARDIZE", multi_loss="Categorical", regularization_x="L2",  regularization_y="L1", gamma_x=0.2, gamma_y=0.5, max_iterations=1000, init="SVD")
-}
+  timepassed = (proc.time() - ptm)/60.0
+  print("************** GLRM model run time: ")
+  print(timepassed)
+  print(" minutes.")
+  }
 
 doTest("GLRM Test: PUBDEV-3454, GLRM stalling", test.glrm.pubdev_3454)
