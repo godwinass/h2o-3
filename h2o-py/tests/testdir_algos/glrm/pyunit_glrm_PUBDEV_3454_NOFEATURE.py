@@ -29,7 +29,7 @@ def glrm_PUBDEV_3454():
   seeds = int(round(time.time()))
 
 #  seeds = 1475363366    # a good seed
-  seeds = 1475451042    # a bad seed
+  seeds = 1475600507    # seed with high iteration number
 
   datahex = \
       h2o.upload_file(pyunit_utils.locate("/Users/wendycwong/Documents/PUBDEV_3454_GLRM/glrm_data_DTolstonogov.csv"),
@@ -51,7 +51,9 @@ def glrm_PUBDEV_3454():
  # glrm_h2o.show()
   iterNum = glrm_h2o._model_json["output"]["iterations"]
   objectv = glrm_h2o._model_json["output"]["objective"]
+  stepSize = glrm_h2o._model_json["output"]["step_size"]
   print("###########  number of iteration is {0}".format(iterNum))
+  print("%%%%%%%%%%%  step size is {0}".format(stepSize))
   print("@@@@@@@@@@@@ seed used is {0}".format(seeds))
   print("&&&&&&&&&&&& objective function value is {0}".format(objectv))
   print("************** Time taken to train GLRM model is {0} seconds".format(endcsv-startcsv))

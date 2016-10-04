@@ -19,7 +19,7 @@ by the run.  Make sure there is no space between each command.  They are only
  separated by comma.
 It will collect all the run time as a sequence, calculate the min/max/mean/std and store
 the info as a json file with the testname in the directory where you are running this script.  Since the
-last argument is True, it will add the current run result to the old ones run and stored already.  The
+last argument is False, it will add the current run result to the old ones run and stored already.  The
 statistics calcluated will be over all the runs, old ones and new ones.  This is done to help you break up
 your experiments into chunks instead of having to run it at one time.  If you are doing a fresh run, put False
 as the last argument
@@ -62,6 +62,7 @@ def run_commands(command, number_to_run, temp_file):
     result_dict["iteration_number"] = []
     result_dict["seed"] = []
     result_dict["loss"] =[]
+    result_dict["step_size"] = []
 
     full_command = command# + ' > ' + temp_file
     list_command = 'cat '+testResult + ' > ' + temp_file
@@ -99,6 +100,9 @@ def run_commands(command, number_to_run, temp_file):
                             else:
                                 if "&&&&&&" in temp_string[0]:
                                     result_dict["loss"].append(temp_string[-1])
+                                else:
+                                    if "%%%%%%%%%" in temp_string[0]:
+                                        result_dict["step_size"].append(temp_string[-1])
 
     print(result_dict)
     return result_dict
@@ -126,6 +130,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
         num_iter = []
         seeds = []
         loss = []
+        step_size = []
 
         if os.path.exists(json_file) and not(is_new_run):
             with open(json_file, 'r') as test_file:
@@ -134,6 +139,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
                 num_iter = temp_dict["iteration_number"]
                 seeds = temp_dict["seed"]
                 loss = temp_dict["loss"]
+                step_size = result_dict["step_size"]
 
 
         if "iteration_number" in dict_keys:
@@ -149,8 +155,14 @@ def write_result_summary(result_dict, directory_path, is_new_run):
             else:
                 seeds = result_dict["seed"]
 
+        if "step_size" in dict_keys:
+            if len(step_size) > 0:
+                step_size.extend(result_dict["step_size"])
+            else:
+                step_size = result_dict["step_size"]
+
         if "loss" in dict_keys:
-            if len(seeds) > 0:
+            if len(loss) > 0:
                 loss.extend(result_dict["loss"])
             else:
                 loss = result_dict["loss"]
@@ -171,6 +183,7 @@ def write_result_summary(result_dict, directory_path, is_new_run):
                 result_dict["iteration_number"] = num_iter
                 result_dict["seed"] = seeds
                 result_dict["loss"] = loss
+                result_dict["step_size"] = step_size
 
                 # save results in json file
                 with open(json_file, 'w') as test_file:
@@ -205,7 +218,7 @@ def main(argv):
         if (argv[3] == 'True'):
             is_new_run = True
         else:
-            is_new_run = False            # brand new run or need to add onto old results
+            is_new_run = False            # need to add onto old results
 
         for command in command_lists.split(','):   # for each command in the list
 
