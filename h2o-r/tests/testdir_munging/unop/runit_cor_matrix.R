@@ -6,31 +6,46 @@ source("../../../scripts/h2o-r-test-setup.R")
 
 
 test.cor <- function() {
-  #1 row case
+  #1 column case
+  print("Running one column case with no NA")
   n <- 20
   g <- runif(n)
   h <- runif(n)
   run.cor.tests(g,h,one_row=TRUE)
-  g[4] <- NA
-  run.cor.tests(g,h,one_row=TRUE, has_nas=TRUE)
 
-  #1 column case
-  run.cor.tests(g,h, has_nas = TRUE)
-  g[4] <- runif(1)
-  run.cor.tests(g,h)
+#  print("Running one column case with an NA")
+#  g[4] <- NA
+#  run.cor.tests(g,h,one_row=TRUE, has_nas=TRUE)
 
   #Matrices
+  print("Running with no NA rows")
   g <- matrix(runif(n),nrow=4)
   h <- matrix(runif(n),nrow=4)
   run.cor.tests(g,h)
 
   #Run with NAs. R's native cor() does not have a na.rm arg, so we must test it this way
-  print("Running NA")
+#  print("Running with 1 NA Row")
+#  g[2,3] <- NA
+#  run.cor.tests(g,h,has_nas=TRUE)
+
+  print("Running with 2 NA Row")
+  g[2,3] <- NA
+  g[1,4] <- NA
+  run.cor.tests(g,h,has_nas=TRUE)
+
+  print("Running with 3 NA Row")
+  g[2,3] <- NA
+  g[1,4] <- NA
+  h[2,3] <- NA
+  run.cor.tests(g,h,has_nas=TRUE)
+
+  print("Running with 4 NA Row")
   g[2,3] <- NA
   g[1,4] <- NA
   h[2,3] <- NA
   h[1,4] <- NA
   run.cor.tests(g,h,has_nas=TRUE)
+
 }
 
 run.cor.tests <- function (g,h,one_row=FALSE,has_nas=FALSE) {
@@ -43,9 +58,9 @@ run.cor.tests <- function (g,h,one_row=FALSE,has_nas=FALSE) {
   for (na.rm in c(FALSE, TRUE)) {
     for (use in uses) {
       if (one_row) {
-        h2o_cor <- cor(as.h2o(g),as.h2o(h), na.rm = na.rm,use = use)
+        h2o_cor <- h2o.cor(as.h2o(g),as.h2o(h), na.rm = na.rm,use = use)
       } else {
-        h2o_cor <- cor(h2o_g, h2o_h, na.rm = na.rm, use = use)
+        h2o_cor <- h2o.cor(h2o_g, h2o_h, na.rm = na.rm, use = use)
       }
 
       R_cor <- stats::cor(g, h, use = use)

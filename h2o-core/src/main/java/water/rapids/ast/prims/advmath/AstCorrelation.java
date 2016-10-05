@@ -130,6 +130,36 @@ public class AstCorrelation extends AstPrimitive {
 
       CorTaskCompleteObsSum taskCompleteObsMean = new CorTaskCompleteObsSum(ncoly, ncolx).doAll(new Frame(fry).add(frx));
       long NACount = taskCompleteObsMean._NACount;
+
+      if(NACount == 0){
+
+        CorTaskEverything[] cvs = new CorTaskEverything[ncoly];
+
+        double[] xmeans = new double[ncolx];
+        double[] ymeans = new double[ncoly];
+        for (int x = 0; x < ncoly; x++)
+          xmeans[x] = vecxs[x].mean();
+        for (int y = 0; y < ncoly; y++)
+          ymeans[y] = vecys[y].mean();
+
+        // Launch tasks; each does all Xs vs one Y
+        for (int y = 0; y < ymeans.length; y++)
+          cvs[y] = new CorTaskEverything(ymeans[y], xmeans).dfork(new Frame(vecys[y]).add(frx));
+
+        // 1-col returns scalar
+        if (ncolx == 1 && ncoly == 1) {
+          return new ValNum(cvs[0].getResult()._cors[0] / cvs[0].getResult()._denom[0]);
+        }
+
+        // Gather all the Xs-vs-Y correlation arrays; divide sigma_x and sigma_y
+        Vec[] res = new Vec[ncoly];
+        Key<Vec>[] keys = Vec.VectorGroup.VG_LEN1.addVecs(ncoly);
+        for (int y = 0; y < ncoly; y++)
+          res[y] = Vec.makeVec(ArrayUtils.div(cvs[y].getResult()._cors, cvs[y].getResult()._denom), keys[y]);
+
+        return new ValFrame(new Frame(fry._names, res));
+      }
+
       double[] ymeans = ArrayUtils.div(taskCompleteObsMean._ysum, fry.numRows() - NACount);
       double[] xmeans = ArrayUtils.div(taskCompleteObsMean._xsum, fry.numRows() - NACount);
 
